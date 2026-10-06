@@ -2,7 +2,7 @@
 
 Hydrological modelling case study: **Lagos Island, Lagos State, Nigeria**
 
-**Live app:** https://Shoola1579.github.io/Lagos-Lagoon-System-Response-to-Extreme-Rainfall/
+**Live app:** https://Shoola1579.github.io/Lagos-Lagoon-System-Response-to-Extreme-Rainfall/index.html
 
 A browser-based tool that estimates how the Lagos lagoon system responds to rainfall, from everyday weather to extreme storms. It runs entirely in the browser, with no server or installation.
 
