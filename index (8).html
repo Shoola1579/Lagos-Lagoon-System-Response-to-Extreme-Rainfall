@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lagos Lagoon System Response to Extreme Rainfall</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--deep:#0b2a35;--teal:#1a7f8e;--mist:#9fcdd3;--paper:#f5f3ec;--card:#fff;--ink:#14282f;--mute:#5d6f74;--line:#dcdfd6;--sand:#e8dfc7;--coral:#d95d39;--amber:#e0a030;--ok:#2f8f62}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:15px/1.6 Manrope,system-ui,sans-serif}
+.hero{background:linear-gradient(160deg,#0b2a35 0%,#10424d 60%,#1a6572 100%);color:#fff;position:relative;overflow:hidden}
+.hero .in{max-width:1180px;margin:auto;padding:40px 24px 90px;display:flex;gap:32px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.hero h1{font:700 clamp(28px,4vw,42px)/1.1 Fraunces,Georgia,serif;margin:0 0 10px;max-width:22ch}
+.hero p{margin:0;max-width:58ch;color:#cfe4e7}
+.hero small{display:block;margin-top:14px;color:var(--mist);font-weight:500}
+.hero svg.wave{position:absolute;left:0;bottom:-1px;width:100%;height:60px}
+main{max-width:1180px;margin:14px auto 0;padding:0 24px 48px;display:grid;grid-template-columns:310px 1fr;gap:22px;position:relative}
+@media(max-width:860px){main{grid-template-columns:1fr}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px;box-shadow:0 8px 24px -16px rgba(11,42,53,.35)}
+aside.card{align-self:start;position:sticky;top:12px}
+h2{font:700 19px Fraunces,Georgia,serif;margin:0 0 10px}
+h3{font:700 15px Manrope;margin:0 0 4px}
+label{display:block;font-weight:600;margin-top:14px;font-size:14px}
+label span{float:right;color:var(--teal);font-variant-numeric:tabular-nums}
+input[type=range]{width:100%;accent-color:var(--teal)}
+.presets{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0 4px}
+button{font:600 13px Manrope;border:1px solid var(--teal);background:#fff;color:var(--teal);padding:5px 11px;border-radius:999px;cursor:pointer}
+button:hover,button:focus-visible{background:var(--teal);color:#fff;outline:none}
+details{margin-top:16px;border-top:1px solid var(--line);padding-top:10px}summary{cursor:pointer;font-weight:700}
+.top{display:grid;grid-template-columns:240px 1fr;gap:18px;align-items:center}
+@media(max-width:620px){.top{grid-template-columns:1fr}}
+.badge{display:inline-block;padding:3px 12px;border-radius:999px;color:#fff;font-weight:700;font-size:13px}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0}
+.stat{background:var(--card);border:1px solid var(--line);border-top:3px solid var(--teal);border-radius:8px;padding:12px 14px}
+.stat small{color:var(--mute);display:block;font-weight:500}.stat strong{font:700 24px Fraunces,Georgia,serif;font-variant-numeric:tabular-nums}
+.chart{height:290px;margin-top:6px}
+.bench{position:relative;height:16px;border-radius:8px;background:linear-gradient(90deg,#cfe6e0 0 25%,#f2dfae 25% 70%,#f0b9a6 70%);margin:34px 0 36px}
+.bench i{position:absolute;top:-6px;width:2px;height:28px;background:var(--deep)}
+.bench i em{position:absolute;top:30px;left:50%;transform:translateX(-50%);font:500 11px Manrope;white-space:nowrap;color:var(--mute)}
+.bench i.u{top:-12px;height:40px;width:4px;background:var(--coral);border-radius:2px}
+.bench i.u em{top:-22px;color:var(--coral);font-weight:700}
+.interp{columns:290px 3;column-gap:26px;margin-top:10px}
+.interp div{border-left:3px solid var(--mist);padding:2px 0 2px 12px;break-inside:avoid;margin-bottom:16px}
+.interp p{margin:0;color:#2c3f45}
+.act{background:var(--sand);border-radius:8px;padding:14px 18px;margin-top:14px}
+.act ul{margin:6px 0 0;padding-left:18px}
+.note{font-size:12.5px;color:var(--mute)}
+.sec{margin-top:18px}
+[hidden]{display:none!important}
+.tabs{max-width:1180px;margin:-44px auto 0;padding:0 24px;display:flex;gap:8px;position:relative}
+.tabs button{padding:8px 18px;font-size:14px}.tabs button.on{background:var(--teal);color:#fff}
+#live,#climate{max-width:1180px;margin:14px auto 0;padding:0 24px 48px}
+.tblwrap{overflow-x:auto}table.fc{width:100%;border-collapse:collapse;font-size:14px}
+.fc th{text-align:left;color:var(--mute);font-weight:600;padding:8px;border-bottom:2px solid var(--line);white-space:nowrap}
+.fc td{padding:9px 8px;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;white-space:nowrap}
+.fc tbody tr{cursor:pointer}.fc tbody tr:hover,.fc tr.sel{background:#e8f2f1}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.head{border-left:8px solid var(--ok)}.head h2{font-size:24px;margin:0 0 4px}.rg{color:var(--mute);font-size:12px}
+#mp{fill:var(--mist);fill-opacity:.45;stroke:var(--deep);stroke-width:1.2}
+#r3{columns:1;max-width:80ch}details.cs{margin-top:18px;padding:18px}details.cs summary{font:700 19px Fraunces,Georgia,serif}.cs h3{margin:18px 0 4px}
+@media print{aside,.hero svg,.presets,button{display:none}main{margin:0;display:block}.hero{background:#fff;color:#000}.hero p,.hero small{color:#333}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="hero"><div class="in">
+<div>
+<h1>Lagos Lagoon System Response to Extreme Rainfall</h1>
+<p>Scenario-based prediction of runoff, peak discharge, lagoon water level and flood duration for Lagos Island, with a plain-language reading of every result.</p>
+<small>Hydrological modelling case study: Lagos Island, Lagos State, Nigeria</small>
+</div>
+<svg viewBox="0 0 200 120" width="200" aria-hidden="true"><g fill="none" stroke="#9fcdd3" stroke-width="2" opacity=".8"><path d="M20 110V60h18v50M42 110V35h20v75M66 110V70h16v50M88 110V48h22v62M114 110V75h16v35M134 110V55h20v55"/><path d="M0 110h200" stroke-width="3"/></g></svg>
+<svg class="wave" viewBox="0 0 1200 60" preserveAspectRatio="none" aria-hidden="true"><path d="M0 30 Q150 0 300 30 T600 30 T900 30 T1200 30V60H0Z" fill="#f5f3ec"/></svg>
+</div></div>
+
+<nav class="tabs"><button id="tabL" class="on">Daily forecast</button><button id="tabE">Scenario explorer</button><button id="tabC">Climate record</button></nav>
+<div id="live">
+<div class="card head" id="headline"></div>
+<div class="card sec top"><div><svg viewBox="0 0 300 183" role="img" aria-label="Lagos Island study area outline"><path id="mp" d="M46.4 183.4L37.3 183.1L26.1 181.1L15.8 174.7L5.5 165.9L0.0 157.1L4.9 154.7L12.4 156.9L21.0 155.2L25.4 144.9L22.9 137.6L22.0 126.3L27.1 114.7L35.6 103.4L37.1 92.2L32.0 84.6L33.6 82.3L36.6 75.8L41.6 67.8L43.4 58.8L39.8 51.4L35.2 45.9L29.2 42.6L35.1 39.6L41.6 37.7L53.5 44.1L64.7 44.8L70.5 38.6L74.3 31.4L74.3 25.7L83.3 21.7L93.7 18.7L103.8 9.2L110.9 0.5L112.5 0.0L120.6 1.4L121.8 6.4L120.9 13.4L119.9 14.7L118.7 19.4L115.5 28.7L110.6 41.4L109.9 48.9L113.2 57.3L120.1 64.7L127.9 69.0L138.7 75.9L145.8 74.2L163.2 78.9L171.3 78.0L181.1 79.2L195.5 77.1L208.9 70.0L217.5 68.1L223.6 60.1L239.2 47.1L250.8 39.4L265.7 39.1L288.9 50.2L294.9 55.2L300.0 57.5L296.5 64.4L288.3 77.2L282.3 90.9L278.0 99.2L269.3 94.9L259.1 96.0L250.7 97.2L242.6 98.9L237.3 107.1L232.4 119.3L230.2 127.9L223.8 134.8L210.4 143.4L197.5 152.1L185.4 158.9L176.1 155.4L164.4 154.7L155.8 153.7L148.9 160.7L144.4 165.3L129.3 165.5L116.9 159.4L110.3 160.0L106.1 167.3L100.5 174.2L93.4 174.3L87.5 167.5L84.0 160.9L78.3 155.9L71.6 151.1L67.2 151.8L63.0 151.5L60.9 157.4L58.4 167.5L57.2 173.8L54.3 178.1L52.2 179.9L46.4 183.4Z" fill-rule="evenodd"/></svg><div class="note">Lagos Island LGA boundary, about 29 km by 18 km</div></div><div id="clim"></div></div>
+<div class="card sec"><h2>Daily flood outlook for Lagos Island</h2><p class="note" id="status">Loading rainfall data...</p>
+<div class="tblwrap"><table class="fc"><thead><tr><th>Date</th><th>Rain (likely range)</th><th>Runoff</th><th>Peak inflow</th><th>Max lagoon level</th><th>Street water</th><th>Chance above critical</th><th>Risk</th></tr></thead><tbody id="fcb"></tbody></table></div>
+<p class="note">Select a day to read its interpretation below.</p></div>
+<div class="card sec"><h2>Rainfall and lagoon level by day</h2><div class="chart"><canvas id="c3"></canvas></div></div>
+<div class="card sec"><div class="top"><div id="g2"></div><div id="v2"></div></div>
+<div class="interp" id="i2" style="margin-top:16px"></div>
+<div class="act"><h3>Suggested response</h3><ul id="a2"></ul></div>
+<p><button id="expl">Open this day in the scenario explorer</button></p></div>
+</div>
+<div id="climate" hidden>
+<div class="card"><h2>Climate record</h2><p class="note">Lagos rainfall 1981-2025 (daily and monthly files) and satellite sea level 1993-2025, with results from your Aim 1. Open a section for its charts and readings.</p><div class="stats" id="kstats" style="margin:12px 0 0"></div></div>
+<details class="card sec cs" open><summary>Rainfall and seasons</summary>
+<h3>Annual rainfall and trend</h3><div class="chart"><canvas id="k1"></canvas></div>
+<h3>Seasonal cycle</h3><div class="chart"><canvas id="k2"></canvas></div><p class="note">The streamflow line is the column in MET_DATA.csv, derived from water level; its units are unconfirmed.</p>
+<h3>How often is a month very wet?</h3><div class="chart"><canvas id="k3"></canvas></div><p class="note">Share of years in which the month's rainfall reached 300 mm or more.</p>
+<div class="interp" id="r1" style="margin-top:18px"></div></details>
+<details class="card sec cs"><summary>Extreme rainfall</summary>
+<h3>Monthly rainfall by return period</h3><div class="chart"><canvas id="k4"></canvas></div><p class="note">Aim 1 frequency analysis of the annual maximum monthly rainfall. These are monthly totals, not single storms.</p>
+<h3>Extreme daily rainfall</h3><div class="chart"><canvas id="k5"></canvas></div><p class="note">Yearly maximum daily rainfall (dots) with fitted Gumbel and GEV curves, zoomed to the record. Aim 3 uses 120 mm for the 5-year storm (red triangle), and 340 mm and 425 mm for the 100-year and 2020-like storms, which are off the top of this chart. Daily data is gridded and cannot show shorter bursts.</p>
+<div class="interp" id="r2" style="margin-top:18px"></div></details>
+<details class="card sec cs"><summary>Sea level</summary>
+<h3>Annual mean and seasonal cycle</h3><div class="chart"><canvas id="k6"></canvas></div><div class="chart" style="height:220px"><canvas id="k7"></canvas></div><p class="note">Satellite sea-level anomaly (daily means, about 0.3 degree grid cell near 6.31 N, 3.44 E). Daily means do not capture tides or short local surges.</p>
+<div class="interp" id="r3" style="margin-top:18px"></div></details>
+</div>
+<main id="explorer" hidden>
+<aside class="card" aria-label="Storm inputs">
+<h2>Storm scenario</h2>
+<div class="note" style="margin:8px 0 0">From the 1981-2025 daily record (24 h)</div><div class="presets" id="presets2"></div><div class="note" style="margin:8px 0 0">Aim 3 storms (6 to 8 h)</div><div class="presets" id="presets"></div>
+<label>Rainfall depth <span id="vR"></span></label><input id="rain" type="range" min="20" max="500" step="5" value="165">
+<label>Storm duration <span id="vD"></span></label><input id="dur" type="range" min="1" max="24" step="1" value="24">
+<details><summary>Catchment and lagoon settings</summary>
+<label>Curve number <span id="vC"></span></label><input id="cn" type="range" min="60" max="95" step="0.5" value="76.54">
+<label>Storm surge <span id="vS"></span></label><input id="surge" type="range" min="0" max="3" step="0.1" value="2"><p class="note" style="margin:2px 0 0">Daily satellite sea level (1993-2025) never exceeded 0.29 m above its long-term mean and did not rise on heavy-rain days. The 2.0 m default comes from your Aim 3 calibration.</p>
+<label>Outlet capacity <span id="vO"></span></label><input id="cap" type="range" min="1000" max="3000" step="100" value="2000">
+<label>Tidal range <span id="vT"></span></label><input id="tide" type="range" min="0.6" max="1.8" step="0.1" value="1.2">
+</details>
+<p class="note sec">Surge scales with rainfall and peaks about 30 h into the event, as in the calibrated model. This explorer assumes normal ground moisture; the Daily forecast adjusts for recent rain.</p>
+<button onclick="window.print()">Print or save report</button>
+</aside>
+
+<section aria-live="polite">
+<div class="card top">
+<div id="gauge"></div>
+<div id="verdict"></div>
+</div>
+<div class="stats" id="stats"></div>
+
+<div class="card"><h2>Inflow hydrograph</h2><div class="chart"><canvas id="c1"></canvas></div></div>
+<div class="card sec"><h2>Lagoon water level</h2><div class="chart"><canvas id="c2"></canvas></div></div>
+<div class="card sec"><h2>Peak discharge against reference flows</h2><div class="bench" id="bench"></div><p class="note"><b>Ogun River</b> is the main river draining Ogun State into the Lagos Lagoon, so its flood flows are used as a benchmark for inflow to the lagoon. The 1,500 m³/s (100-year), 2,500 m³/s (drainage capacity) and 3,500 m³/s (2020 flood) values are the reference figures from your Aim 3 notes and have not been checked against measured records.</p></div>
+
+<div class="card sec">
+<h2>What these results mean</h2>
+<div class="interp" id="interp"></div>
+<div class="act"><h3>Suggested response</h3><ul id="acts"></ul></div>
+</div>
+<p class="note sec">Limits: parameters were calibrated to literature peak flows and levels (6 and 3 reference points), not a continuous gauge record. Use for scenario screening and planning, not operational forecasting. The preset storm depths are single-event values from the model script, and the wettest month in the 1981-2025 record is 471 mm.</p>
+</section>
+</main>
+
+<script>
+const W={area:4500,eff:0.35,lag:18,rec:4.5,att:0.45,base:0.05};
+const L={areaM2:237.79e6,evap:4.5,crit:0.5,over:1.5,baseQ:100,width:800};
+const SIM_H=120,DT=0.25,DRAIN=2500,Q2020=3500,OGUN100=1500;
+const PRESETS={'5-yr':[120,6],'10-yr':[165,6],'25-yr':[220,6],'50-yr':[275,6],'100-yr':[340,6],'2020-like':[425,8]};
+const DPRESETS={'10-yr':[84,24],'50-yr':[115,24],'100-yr':[127,24],'100-yr (GEV)':[189,24],'4 Jul 2020 (166 mm)':[166,24]};
+const RT=[[120,5],[165,10],[220,25],[275,50],[340,100],[425,200]];
+
+function scsRunoff(P,cn){const S=25400/cn-254,Ia=0.2*S;return P<=Ia?0:(P-Ia)**2/(P-Ia+S)}
+function hydrograph(P,cn){
+  const Q=scsRunoff(P,cn),S=25400/cn-254;
+  const eff=W.eff+(P>250?Math.min(0.08,(P-250)/3000):0);
+  const Tp=W.lag,Tb=Tp+W.rec*Tp;
+  const att=P>300?Math.min(0.55,W.att+(P-300)/3000):W.att;
+  const Qp=0.208*W.area*eff*Q/Tp*att;
+  const t=[],q=[];
+  for(let x=0;x<=SIM_H+DT/2;x+=DT){
+    let f=0;
+    if(x>0){const r=x/Tp;f=Qp*r*r*Math.exp(-2*(r-1));if(x>Tb*1.5)f*=Math.exp(-(x-Tb*1.5)/Tp)}
+    f+=W.base*Qp*Math.exp(-x/(Tb*3));
+    t.push(x);q.push(Math.max(f,0));
+  }
+  return{t,q,runoff:Q,Ia:0.2*S};
+}
+function interp(t,q,x){const i=Math.min(Math.floor(x/DT),t.length-2);if(i<0)return q[0];const w=(x-t[i])/DT;return q[i]*(1-w)+q[i+1]*w}
+function simulate(o){
+  const h=hydrograph(o.rain,o.cn),n=Math.floor(SIM_H/DT);
+  const wl=new Array(n).fill(0),tt=[],tides=new Array(n).fill(0);
+  const rate=o.rain/o.dur,E=L.evap/1000/86400*L.areaM2,si=Math.min(1,o.rain/425);
+  for(let i=0;i<n;i++)tt.push(i*DT);
+  for(let i=1;i<n;i++){
+    const t=tt[i];
+    const Qin=interp(h.t,h.q,t)+(t<o.dur?rate/1000/3600*L.areaM2:0)+L.baseQ;
+    const surge=t<48?o.surge*si*Math.exp(-((t-30)**2)/200):0;
+    tides[i]=(o.tide/2)*Math.sin(2*Math.PI*t/12.42)+surge;
+    const head=wl[i-1]-tides[i];
+    let Qout=0;
+    if(head>0.01)Qout=Math.min(1.7*L.width*head**1.5,o.cap);
+    else if(head<-0.01)Qout=-800*Math.abs(head)**1.5;
+    wl[i]=Math.min(5,Math.max(-3,wl[i-1]+(Qin-Qout-E)*DT*3600/L.areaM2));
+  }
+  const maxWl=Math.max(...wl);
+  const floodH=wl.filter(v=>v>L.crit).length*DT,overH=wl.filter(v=>v>L.over).length*DT;
+  const peakQ=Math.max(...h.q),tPeak=h.t[h.q.indexOf(peakQ)];
+  const risk=overH>0?'Extreme':floodH>4?'High':floodH>0?'Moderate':'Low';
+  return{h,tt,wl,tides,maxWl,tMax:tt[wl.indexOf(maxWl)],floodH,overH,peakQ,tPeak,risk,surgeNow:o.surge*si};
+}
+const GU={U:43.31,A:18.3},GV={c:-0.361,l:41.01,s:12.53};
+const tG=P=>1/(1-Math.exp(-Math.exp(-(P-GU.U)/GU.A)));
+const tE=P=>{const b=1-GV.c*(P-GV.l)/GV.s;if(b<=0)return Infinity;return 1/(1-Math.exp(-Math.pow(b,1/GV.c)))};
+function returnT(P){const t=Math.min(tG(P),tE(P));return t<2?null:t}
+const fT=t=>t>500?'500+':Math.round(t);
+const rtText=P=>{const a=tG(P),b=tE(P),lo=Math.min(a,b),hi=Math.max(a,b);if(lo<2)return'a frequent event (more often than every 2 years)';
+  if(lo>500)return'rarer than a 1-in-500-year event on the 1981-2025 daily record';
+  if(fT(lo)===fT(hi))return'about a 1-in-'+fT(lo)+'-year event on the 1981-2025 daily record';
+  return'a 1-in-'+fT(lo)+' to 1-in-'+fT(hi)+'-year event on the 1981-2025 daily record (range from two fitted distributions)'};
+const $=id=>document.getElementById(id);
+const fmt={rain:v=>v+' mm',dur:v=>v+' h',cn:v=>(+v).toFixed(1),surge:v=>(+v).toFixed(1)+' m',cap:v=>v+' m³/s',tide:v=>(+v).toFixed(1)+' m'};
+const ids={rain:'vR',dur:'vD',cn:'vC',surge:'vS',cap:'vO',tide:'vT'};
+const COL={Low:'#2f8f62',Moderate:'#e0a030',High:'#d95d39',Extreme:'#8a1f12'};
+let c1,c2;
+
+function arc(a0,a1,col){
+  const p=a=>[100+80*Math.cos(Math.PI+a*Math.PI),100+80*Math.sin(Math.PI+a*Math.PI)];
+  const[x0,y0]=p(a0),[x1,y1]=p(a1);
+  return`<path d="M${x0} ${y0}A80 80 0 0 1 ${x1} ${y1}" stroke="${col}" stroke-width="16" fill="none"/>`;
+}
+function gauge(wl,risk,tg){
+  const f=v=>Math.min(1,Math.max(0,v/3));
+  const a=f(wl),nx=100+62*Math.cos(Math.PI+a*Math.PI),ny=100+62*Math.sin(Math.PI+a*Math.PI);
+  $(tg||'gauge').innerHTML=`<svg viewBox="0 0 200 128" role="img" aria-label="Water level gauge ${wl.toFixed(2)} metres">
+  ${arc(0,f(L.crit),'#bfe0cf')}${arc(f(L.crit),f(L.over),'#f2d896')}${arc(f(L.over),1,'#eeb0a0')}
+  <line x1="100" y1="100" x2="${nx}" y2="${ny}" stroke="#0b2a35" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="100" cy="100" r="8" fill="#0b2a35"/>
+  <text x="100" y="124" text-anchor="middle" font-family="Fraunces,serif" font-weight="700" font-size="20" fill="${COL[risk]}">${wl.toFixed(2)} m</text>
+  <text x="14" y="118" font-size="9" fill="#5d6f74">0</text><text x="176" y="118" font-size="9" fill="#5d6f74">3 m</text></svg>`;
+}
+function mkChart(ctx,old,sets,ylab){
+  if(old)old.destroy();
+  return new Chart(ctx,{type:'line',data:{datasets:sets},options:{responsive:true,maintainAspectRatio:false,animation:false,
+    elements:{point:{radius:0}},interaction:{mode:'nearest',axis:'x',intersect:false},
+    scales:{x:{type:'linear',min:0,max:96,title:{display:true,text:'Hours since storm start'},grid:{color:'#eceee8'}},y:{title:{display:true,text:ylab},grid:{color:'#eceee8'}}},
+    plugins:{legend:{position:'bottom',labels:{usePointStyle:true,boxWidth:8}}}}});
+}
+const xy=(x,y)=>x.map((v,i)=>({x:v,y:y[i]}));
+const line=(l,y,c)=>({label:l,data:[{x:0,y},{x:96,y}],borderColor:c,borderDash:[6,4],borderWidth:1.5});
+
+function interpret(o,r){
+  const T=returnT(o.rain),h=r.h,rc=h.runoff/o.rain,lead=r.tPeak-o.dur;
+  const out=[],acts=[];
+  out.push(['Rainfall and return period',`${o.rain} mm in ${o.dur} h is ${rtText(o.rain)}. ${(T===null||T<5)?'Storms this size are routine and the system is expected to cope.':T<50?'This is a significant design storm that the drainage network is meant to handle, though not with much margin.':'This is a rare, extreme storm of the kind that drives major urban flooding.'}`]);
+  out.push(['Runoff',`About ${h.runoff.toFixed(1)} mm leaves the catchment as runoff, a coefficient of ${rc.toFixed(2)}. ${rc>0.5?'More than half of the rain becomes runoff because dense, paved Lagos Island surfaces have little capacity to absorb water.':rc>0.3?'A moderate share becomes runoff; paved surfaces dominate but soils and green space still absorb some.':'Most of the rain is absorbed or stored, so the runoff response is limited.'} The first ${h.Ia.toFixed(1)} mm is absorbed before any runoff starts (curve number ${o.cn.toFixed(1)}).`]);
+  out.push(['Peak discharge',`The inflow peaks at ${Math.round(r.peakQ).toLocaleString()} m³/s, which is ${(r.peakQ/DRAIN*100).toFixed(0)}% of the ~${DRAIN} m³/s drainage capacity and ${(r.peakQ/Q2020*100).toFixed(0)}% of the ~${Q2020} m³/s estimated for the 2020 flood. ${r.peakQ>Q2020?'This exceeds the 2020 flood, a worst-case magnitude for the area.':r.peakQ>DRAIN?'Flow exceeds drainage capacity, so surcharging and street flooding are likely.':'Flow stays within drainage capacity.'}${r.peakQ>o.cap?` It also exceeds the lagoon outlet capacity (${o.cap} m³/s), so water backs up in the lagoon.`:''}`]);
+  out.push(['Timing',`Discharge peaks ${r.tPeak.toFixed(1)} h after the storm starts${lead>0?`, about ${lead.toFixed(0)} h after the rain stops`:''}. This delay reflects the large upstream catchment and gives a useful window for warnings and for opening pumps or gates.`]);
+  out.push(['Lagoon water level',`The lagoon reaches ${r.maxWl.toFixed(2)} m at hour ${r.tMax.toFixed(0)}. ${r.maxWl>L.over?`That is ${(r.maxWl-L.over).toFixed(2)} m above the ${L.over} m overflow level, so water spills onto low-lying land.`:r.maxWl>L.crit?`That is ${(r.maxWl-L.crit).toFixed(2)} m above the ${L.crit} m critical level but below overflow, so low-lying roads and drains are affected first.`:`That is ${(L.crit-r.maxWl).toFixed(2)} m below the critical level, so no flooding is expected.`}`]);
+  out.push(['Duration of flooding',r.floodH===0?'The lagoon never exceeds the critical level, so there is no flood duration.':`The lagoon stays above the critical level for ${r.floodH.toFixed(1)} h${r.overH>0?` and above overflow for ${r.overH.toFixed(1)} h`:''}. ${r.floodH>12?'Flooding lasts more than half a day, long enough to disrupt transport, trade and sanitation.':r.floodH>4?'Several hours of standing water will disrupt movement and damage ground-floor property.':'Short-lived flooding that clears with the tide.'}`]);
+  out.push(['Tide and surge',`The surge adds up to ${r.surgeNow.toFixed(2)} m on top of a ${o.tide.toFixed(1)} m tidal range. ${r.tMax>20&&r.tMax<42&&r.surgeNow>0.5?'The level peaks while surge is highest, a sign of compound flooding where sea conditions stop the lagoon draining while river inflow arrives.':'The peak level is mainly set by inflow rather than by surge.'}`]);
+  const rk={Low:'Low risk: the lagoon stays below the critical level.',Moderate:'Moderate risk: critical level exceeded for under 4 h.',High:'High risk: critical level exceeded for more than 4 h.',Extreme:'Extreme risk: the overflow level is exceeded.'};
+  out.push(['Risk class',rk[r.risk]+' Classes follow the thresholds in the calibrated model (0.5 m critical, 1.5 m overflow).']);
+  if(r.risk==='Low')acts.push('Maintain drains and outlets; no special action needed for this storm.');
+  if(r.risk==='Moderate'||r.risk==='High')acts.push('Issue early advisories for low-lying districts and clear drains and outlets before the peak.');
+  if(r.risk==='High'||r.risk==='Extreme')acts.push('Pre-position pumps, close vulnerable roads and prepare evacuation of the lowest areas.');
+  if(r.risk==='Extreme')acts.push('Activate emergency response; plan for several hours of overflow and compound surge flooding.');
+  if(r.peakQ>o.cap)acts.push('Outlet capacity is the bottleneck: raising it is the most direct way to cut lagoon levels.');
+  if(lead>0)acts.push(`Use the ~${lead.toFixed(0)} h gap between rainfall and peak flow for warning and response.`);
+  if(o.rain>425)acts.push('This storm lies outside the 120-425 mm range used for calibration, so treat the numbers as less certain.');
+  return{out,acts};
+}
+
+function run(){
+  const o={};for(const k of Object.keys(ids)){o[k]=+$(k).value;$(ids[k]).textContent=fmt[k]($(k).value)}
+  const r=simulate(o),R=interpret(o,r);
+  gauge(r.maxWl,r.risk);
+  $('verdict').innerHTML=`<span class="badge" style="background:${COL[r.risk]}">${r.risk} risk</span><h2 style="margin-top:8px">${rtText(o.rain)[0].toUpperCase()+rtText(o.rain).slice(1)}</h2><p style="margin:0;color:var(--mute)">${o.rain} mm over ${o.dur} h gives a lagoon peak of ${r.maxWl.toFixed(2)} m and ${r.floodH.toFixed(1)} h above the critical level.</p>`;
+  const S=(a,b)=>`<div class="stat"><small>${a}</small><strong>${b}</strong></div>`;
+  $('stats').innerHTML=S('Runoff depth',r.h.runoff.toFixed(1)+' mm')+S('Runoff coefficient',(r.h.runoff/o.rain).toFixed(2))+S('Peak discharge',Math.round(r.peakQ).toLocaleString()+' m³/s')+S('Time to peak',r.tPeak.toFixed(1)+' h')+S('Max water level',r.maxWl.toFixed(2)+' m')+S('Flood duration',r.floodH.toFixed(1)+' h')+S('Overflow duration',r.overH.toFixed(1)+' h')+S('Surge applied',r.surgeNow.toFixed(2)+' m');
+  c1=mkChart($('c1'),c1,[{label:'Inflow (m³/s)',data:xy(r.h.t,r.h.q),borderColor:'#1a7f8e',backgroundColor:'rgba(26,127,142,.15)',fill:'origin',borderWidth:2.5},line('Drainage capacity',DRAIN,'#e0a030'),line('2020 flood',Q2020,'#d95d39')],'Discharge (m³/s)');
+  c2=mkChart($('c2'),c2,[{label:'Lagoon level (m)',data:xy(r.tt,r.wl),borderColor:'#0b2a35',borderWidth:2.5},{label:'Tide + surge (m)',data:xy(r.tt,r.tides),borderColor:'#9fcdd3',borderWidth:1.5},line('Critical 0.5 m',L.crit,'#e0a030'),line('Overflow 1.5 m',L.over,'#d95d39')],'Water level (m above MSL)');
+  const max=4500,pc=v=>Math.min(100,v/max*100)+'%';
+  $('bench').innerHTML=`<i style="left:${pc(OGUN100)}"><em>Ogun River 100-yr ${OGUN100}</em></i><i style="left:${pc(DRAIN)}"><em>Drainage ${DRAIN}</em></i><i style="left:${pc(Q2020)}"><em>2020 flood ${Q2020}</em></i><i class="u" style="left:${pc(r.peakQ)}"><em>This storm ${Math.round(r.peakQ)}</em></i>`;
+  $('interp').innerHTML=R.out.map(([h,p])=>`<div><h3>${h}</h3><p>${p}</p></div>`).join('');
+  $('acts').innerHTML=R.acts.map(a=>`<li>${a}</li>`).join('');
+}
+/* ---------- Continuous daily engine ---------- */
+const CLIM={"1": [14.3, 71.6, 2014], "2": [27.9, 244.8, 1982], "3": [73.6, 192.7, 2015], "4": [128.0, 260.5, 2003], "5": [173.1, 269.5, 1983], "6": [244.3, 394.7, 2023], "7": [222.8, 417.1, 1991], "8": [187.6, 438.9, 2021], "9": [262.4, 445.8, 2010], "10": [192.1, 471.1, 2019], "11": [45.7, 233.9, 2021], "12": [17.7, 83.0, 1997]};
+const KD={"yrs": [1981, 1982, 1983, 1984, 1985, 1986, 1987, 1988, 1989, 1990, 1991, 1992, 1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2023, 2024, 2025], "ann": [1554, 1634, 1054, 1417, 1533, 1423, 1709, 2024, 1649, 1352, 1487, 1262, 1594, 1598, 1923, 1517, 1714, 1402, 1341, 1148, 1319, 1400, 1487, 1639, 1043, 1400, 1778, 1573, 1532, 1979, 1578, 1909, 1355, 1756, 1250, 1644, 1604, 1814, 2145, 1525, 2201, 1992, 2037, 1536, 1695], "sen": 6.97, "ic": -12411.4, "mo": {"mean": [14.3, 27.9, 73.6, 128.0, 173.1, 244.3, 222.8, 187.6, 262.4, 192.1, 45.7, 17.7], "p10": [0.1, 1.2, 28.3, 62.1, 108.9, 168.4, 122.0, 95.8, 165.0, 111.0, 11.1, 0.5], "p90": [42.3, 48.5, 117.9, 194.5, 240.9, 329.1, 305.6, 327.2, 386.4, 267.3, 88.1, 50.2], "max": [71.6, 244.8, 192.7, 260.5, 269.5, 394.7, 417.1, 438.9, 445.8, 471.1, 233.9, 83.0], "flow": [78.0, 53.0, 48.0, 58.0, 125.0, 240.0, 386.0, 435.0, 642.0, 513.0, 257.0, 133.0], "wet": [0.0, 0.0, 0.0, 0.0, 0.0, 22.0, 13.0, 11.0, 31.0, 7.0, 0.0, 0.0]}, "rp": {"T": [2, 5, 10, 25, 50, 100, 200], "Gumbel": [312, 374, 416, 468, 506, 545, 583], "Gum_lo": [295, 351, 386, 429, 461, 492, 523], "Gum_hi": [332, 396, 441, 499, 542, 586, 629], "GEV": [319, 377, 409, 444, 465, 484, 501], "GEV_lo": [298, 352, 383, 415, 432, 445, 456], "GEV_hi": [346, 406, 438, 476, 511, 553, 602], "LP3": [318, 378, 412, 452, 479, 505, 529]}, "rec": 471.0},ETM=[144.8, 158.0, 162.2, 158.8, 144.0, 120.7, 106.1, 102.4, 109.1, 122.3, 140.3, 145.2];
+const KR=[166.1, 113.4, 101.9, 85.7, 81.1, 80.0, 78.5, 77.6, 65.5, 65.0, 61.3, 60.9, 55.4, 55.4, 54.2, 53.1, 52.6, 52.4, 52.3, 50.2, 50.0, 49.4, 48.6, 48.4, 47.0, 46.8, 45.1, 44.2, 42.6, 41.8, 39.9, 39.4, 37.8, 34.3, 34.0, 33.1, 32.6, 32.6, 32.2, 32.1, 32.1, 30.8, 30.2, 29.5, 27.4],KS={"yrs": [1993, 1994, 1995, 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021, 2022, 2024, 2025], "ann": [0.005, 0.009, 0.02, 0.012, 0.016, 0.001, 0.014, 0.013, 0.025, 0.03, 0.036, 0.026, 0.026, 0.028, 0.039, 0.042, 0.032, 0.07, 0.055, 0.068, 0.064, 0.073, 0.078, 0.068, 0.074, 0.087, 0.107, 0.08, 0.106, 0.093, 0.129, 0.117], "mon": [0.033, 0.071, 0.059, 0.042, 0.037, 0.019, -0.012, -0.01, 0.057, 0.136, 0.134, 0.039], "slope": 3.56, "lo": NaN, "hi": NaN, "dmax": 0.209, "p99": 0.145, "maxraw": 0.294, "ols": 3.62, "ic": -7.0993, "p": 0.0};
+const BASE_CN=76.54,D0={surge:2,cap:2000,tide:1.2},URB={c:0.75,drain:15},NAMES=['Low','Moderate','High','Extreme'];
+function amc(cn,p5){if(p5<35.6)return[4.2*cn/(10-0.058*cn),'I'];if(p5>53.3)return[23*cn/(10+0.13*cn),'III'];return[cn,'II']}
+const UH=(()=>{const a=[],Tb=W.lag*(1+W.rec)*1.5;for(let t=0;t<=150;t++){let f=0;if(t>0){const r=t/W.lag;f=r*r*Math.exp(-2*(r-1));if(t>Tb)f*=Math.exp(-(t-Tb)/W.lag)}a.push(f)}return a})();
+function engine(rain,opt){
+  const br=opt.basin||rain,n=rain.length,dt=0.25,E=(opt.evap||L.evap)/1000/86400*L.areaM2;
+  const dQ=new Array(n).fill(0),P24=new Array(n).fill(0),Qw=new Array(n).fill(0);
+  let dry=99,Pc=0,Qp=0,cn=BASE_CN,run=0;
+  for(let h=0;h<n;h++){
+    run+=br[h]-(h>=24?br[h-24]:0);P24[h]=run;
+    if(br[h]>=0.1){
+      if(dry>=6){Pc=0;Qp=0;let p5=0;for(let k=Math.max(0,h-120);k<h;k++)p5+=br[k];cn=Math.min(98,amc(BASE_CN*opt.cnScale,p5)[0])}
+      Pc+=br[h];const Qc=scsRunoff(Pc,cn);dQ[h]=Qc-Qp;Qp=Qc;dry=0;
+    }else dry++;
+  }
+  for(let h=0;h<n;h++){if(dQ[h]<=0)continue;
+    const P=P24[h],eff=W.eff+(P>250?Math.min(0.08,(P-250)/3000):0),att=P>300?Math.min(0.55,W.att+(P-300)/3000):W.att;
+    const K=0.208*W.area*eff*att/W.lag*dQ[h];
+    for(let t=0;t<UH.length&&h+t<n;t++)Qw[h+t]+=K*UH[t];}
+  const m=n*4,wl=new Float32Array(m),sp=new Float32Array(m);let pond=0;
+  for(let i=1;i<m;i++){
+    const t=i*dt,h=Math.min(n-1,Math.floor(t)),h1=Math.min(n-1,h+1),w=t-h;
+    const Qin=Qw[h]*(1-w)+Qw[h1]*w+rain[h]/1000/3600*L.areaM2+L.baseQ;
+    const tide=(opt.ts?opt.ts[h]*(1-w)+opt.ts[h1]*w:(opt.tide/2)*Math.sin(2*Math.PI*t/12.42))+opt.surge*Math.min(1,P24[Math.max(0,Math.floor(t-6))]/425);
+    const head=wl[i-1]-tide;let Qo=0;
+    if(head>0.01)Qo=Math.min(1.7*L.width*head**1.5,opt.cap);else if(head<-0.01)Qo=-800*Math.abs(head)**1.5;
+    wl[i]=Math.min(5,Math.max(-3,wl[i-1]+(Qin-Qo-E)*dt*3600/L.areaM2));
+    const drain=URB.drain*(1-0.6*Math.min(1,Math.max(0,(wl[i]-0.3)/1.2)));
+    pond=Math.max(0,pond+(rain[h]*URB.c-drain)*dt);sp[i]=pond;
+  }
+  return{Qw,dQ,wl,sp};
+}
+function daily(res,rain,nd){return Array.from({length:nd},(_,d)=>{
+  let ro=0,pq=0,rn=0,wet=0;for(let h=d*24;h<d*24+24;h++){ro+=res.dQ[h];pq=Math.max(pq,res.Qw[h]);rn+=rain[h];if(rain[h]>=0.1)wet++}
+  let mw=-9,fl=0,ov=0,sp=0;for(let i=d*96;i<d*96+96;i++){const v=res.wl[i];mw=Math.max(mw,v);if(v>L.crit)fl+=.25;if(v>L.over)ov+=.25;sp=Math.max(sp,res.sp[i])}
+  return{rain:rn,runoff:ro,peakQ:pq,maxWl:mw,floodH:fl,overH:ov,street:sp,wet}})}
+const lagRisk=s=>s.overH>0?3:s.floodH>4?2:s.floodH>0?1:0, strRisk=s=>s>100?2:s>20?1:0;
+const qnt=(a,p)=>{const s=[...a].sort((x,y)=>x-y);return s[Math.min(s.length-1,Math.floor(p*s.length))]};
+function rng(seed){return()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+function forecastModel(rain,TI,N=80,basin,ts){
+  const nd=Math.floor(rain.length/24),R=rng(7),z=()=>Math.sqrt(-2*Math.log(R()+1e-12))*Math.cos(2*Math.PI*R());
+  const cen=daily(engine(rain,{cnScale:1,...D0,basin,ts,evap:EVAP}),rain,nd),mem=[];
+  for(let k=0;k<N;k++){
+    const f=Array.from({length:nd},(_,d)=>{const s=d<TI?0.1:0.3+0.06*(d-TI);return Math.exp(s*z()-s*s/2)});
+    const r=rain.map((v,h)=>v*f[Math.floor(h/24)]),b=basin?basin.map((v,h)=>v*f[Math.floor(h/24)]):null;
+    mem.push(daily(engine(r,{cnScale:1+0.04*z(),surge:D0.surge*Math.max(0.2,1+0.2*z()),cap:D0.cap*Math.min(1.3,Math.max(0.7,1+0.1*z())),tide:D0.tide,basin:b,ts,evap:EVAP}),r,nd));
+  }
+  return cen.map((c,d)=>{
+    const M=mem.map(x=>x[d]),p5=(basin||rain).slice(Math.max(0,d*24-120),d*24).reduce((a,b)=>a+b,0),[cn,cls]=amc(BASE_CN,p5);
+    return{c,p5,cn,cls,level:Math.max(lagRisk(c),strRisk(c.street)),risk:NAMES[Math.max(lagRisk(c),strRisk(c.street))],
+      prob:M.filter(x=>x.floodH>0).length/N,probStreet:M.filter(x=>x.street>20).length/N,N,
+      wlR:[qnt(M.map(x=>x.maxWl),.1),qnt(M.map(x=>x.maxWl),.9)],rainR:[qnt(M.map(x=>x.rain),.1),qnt(M.map(x=>x.rain),.9)]};
+  });
+}
+function interpretDay(d){
+  const c=d.c,pc=v=>(v*100).toFixed(0)+'%',out=[],acts=[];
+  out.push(['Rain and ground wetness',`${c.rain.toFixed(1)} mm expected, likely between ${d.rainR[0].toFixed(1)} and ${d.rainR[1].toFixed(1)} mm. The previous 5 days brought ${d.p5.toFixed(0)} mm, so the ground is in moisture class ${d.cls}, ${d.cls==='I'?'dry, and absorbs more rain':d.cls==='III'?'wet, and sends more rain straight to runoff':'normal'}.`]);
+  out.push(['Runoff and inflow',c.runoff<0.5?`Almost none of the rain becomes basin runoff (${c.runoff.toFixed(1)} mm) because the soil absorbs it first. Lagoon inflow is mostly the steady ~${L.baseQ} m³/s baseflow.`:`The basin generates ${c.runoff.toFixed(1)} mm of runoff. The 4,500 km² catchment responds slowly, so inflow reaches about ${Math.round(c.peakQ)} m³/s up to a day or more after the rain and can affect later days.`]);
+  out.push(['Lagoon level',`The lagoon peaks near ${c.maxWl.toFixed(2)} m (likely ${d.wlR[0].toFixed(2)} to ${d.wlR[1].toFixed(2)} m). ${c.floodH>0?`It stays above the ${L.crit} m critical level for ${c.floodH.toFixed(1)} h${c.overH>0?` and above overflow for ${c.overH.toFixed(1)} h`:''}.`:`That is ${(L.crit-c.maxWl).toFixed(2)} m below the critical level.`} Water carried over from earlier days is included.`]);
+  out.push(['Street flooding',c.street<1?`Rain intensity stays within the ~${URB.drain} mm/h street drainage capacity, so no ponding is expected.`:`Short intense bursts exceed street drainage (reduced further when the lagoon is high), leaving up to ${c.street.toFixed(0)} mm of surface water: ${c.street>100?'severe, roads are likely impassable':c.street>20?'nuisance flooding in low spots and on roads':'minor ponding'}.`]);
+  out.push(['Confidence',`Across ${d.N} runs that vary forecast rain, curve number, surge and outlet capacity, the lagoon passed the critical level in ${pc(d.prob)} and street water exceeded 20 mm in ${pc(d.probStreet)}. Forecast skill falls with lead time, so later days have wider ranges.`]);
+  if(d.level===0&&d.prob<0.2&&d.probStreet<0.2)acts.push('No action needed; keep drains and outlets clear.');
+  if(d.level===0&&(d.prob>=0.2||d.probStreet>=0.2))acts.push('Low risk in the central forecast but a real chance of more rain: check drains and re-check the forecast tomorrow.');
+  if(d.level>=1)acts.push('Issue advisories for low-lying districts and clear drains and outlets before the rain.');
+  if(d.level>=2)acts.push('Pre-position pumps, close vulnerable roads and prepare to move people from the lowest areas.');
+  if(c.street>20)acts.push('Expect disruption to traffic and trade in streets with poor drainage.');
+  if(c.peakQ>D0.cap)acts.push('Inflow exceeds outlet capacity; raising outlet flow is the most direct way to lower lagoon levels.');
+  return{out,acts};
+}
+
+/* ---------- Page logic ---------- */
+let days=[],sel=5,TI=5,c3,EVAP=4.5,kc=[];
+const dn=d=>new Date(d.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'short'});
+const PTS=[[6.45,3.40],[6.62,3.51],[6.60,3.34],[7.16,3.35],[6.82,3.92]];
+async function getJSON(u){const r=await fetch(u);if(!r.ok)throw 0;return r.json()}
+async function loadForecast(){
+  const u1=`https://api.open-meteo.com/v1/forecast?latitude=${PTS.map(p=>p[0]).join(',')}&longitude=${PTS.map(p=>p[1]).join(',')}&hourly=precipitation&timezone=Africa%2FLagos&past_days=5&forecast_days=7`;
+  let rd,sea=null,src='live';
+  try{rd=await getJSON(u1);try{localStorage.setItem('lagosFc2',JSON.stringify(rd))}catch(e){}}
+  catch(e){try{rd=JSON.parse(localStorage.getItem('lagosFc2'));src='cached (offline)'}catch(e2){rd=null}}
+  if(!rd){$('status').textContent='Rainfall data could not be loaded. Check your connection and reload the page.';return}
+  try{sea=await getJSON('https://marine-api.open-meteo.com/v1/marine?latitude=6.30&longitude=3.40&hourly=sea_level_height_msl&timezone=Africa%2FLagos&past_days=5&forecast_days=7')}catch(e){}
+  const arr=Array.isArray(rd)?rd:[rd],H=arr[0].hourly;
+  const rain=H.precipitation.map(v=>v||0),nd=Math.floor(rain.length/24),n=nd*24;
+  const basin=rain.map((_,h)=>arr.reduce((s,d)=>s+(d.hourly.precipitation[h]||0),0)/arr.length);
+  let ts=null;
+  if(sea&&sea.hourly&&sea.hourly.sea_level_height_msl){
+    const m={};sea.hourly.time.forEach((t,i)=>m[t]=sea.hourly.sea_level_height_msl[i]);
+    const v=H.time.map(t=>m[t]);
+    if(v.filter(x=>x!=null).length>v.length*0.9)ts=v.map(x=>x==null?0:Math.max(-1.5,Math.min(1.5,x)));
+  }
+  const dates=Array.from({length:nd},(_,d)=>H.time[d*24].slice(0,10));
+  const today=new Date().toLocaleDateString('en-CA',{timeZone:'Africa/Lagos'});
+  TI=dates.indexOf(today);if(TI<0)TI=Math.min(5,nd-1);sel=TI;{const dt=new Date(dates[TI]+'T12:00:00'),m=dt.getMonth()+1;EVAP=ETM[m-1]/new Date(dt.getFullYear(),m,0).getDate()}
+  days=forecastModel(rain.slice(0,n),TI,80,basin.slice(0,n),ts&&ts.slice(0,n)).map((d,i)=>({...d,date:dates[i]}));
+  $('status').textContent=`Rainfall: Open-Meteo (${src}), averaged over ${arr.length} points across the lagoon basin for inflow, with Lagos Island rain used for streets. Tide: ${ts?'Open-Meteo sea-level forecast':'modelled 12.4 h cycle (sea-level data unavailable)'}. Refreshed ${new Date().toLocaleTimeString()}. Ranges come from 80 simulations that vary rain, curve number, surge and outlet capacity.`;
+  renderLive();
+}
+function renderLive(){
+  if(!days.length)return;
+  const fut=days.slice(TI),worst=fut.reduce((a,b)=>b.level>a.level||(b.level===a.level&&b.prob>a.prob)?b:a),watch=fut.find(d=>d.prob>=0.2||d.probStreet>=0.2);
+  const col=worst.level>0?COL[worst.risk]:watch?COL.Moderate:COL.Low;
+  $('headline').style.borderLeftColor=col;
+  $('headline').innerHTML=`<h2>${worst.level>0?`${worst.risk} flood risk on ${dn(worst)}`:watch?`Low risk, but watch ${dn(watch)}`:'No flooding expected in the next 7 days'}</h2><p style="margin:0;color:var(--mute)">Highest chance of the lagoon passing its critical level: ${(Math.max(...fut.map(d=>d.prob))*100).toFixed(0)}%. Wettest day: ${Math.max(...fut.map(d=>d.c.rain)).toFixed(1)} mm.</p>`;
+  $('mp').style.fill=col;
+  let fc=0,nm=0;for(let i=TI;i<Math.min(days.length,TI+7);i++){const dt=new Date(days[i].date+'T12:00:00'),m=dt.getMonth()+1;fc+=days[i].c.rain;nm+=CLIM[m][0]/new Date(dt.getFullYear(),m,0).getDate()}
+  const ra=fc/Math.max(nm,1e-6),wd=ra<0.5?'much drier than normal':ra<0.85?'drier than normal':ra<=1.15?'close to normal':ra<=1.5?'wetter than normal':'much wetter than normal';
+  const cm=new Date(days[TI].date+'T12:00:00').getMonth()+1,MN=['January','February','March','April','May','June','July','August','September','October','November','December'][cm-1];
+  $('clim').innerHTML=`<h2>Climate context</h2><p style="margin:0 0 8px">The next 7 days bring about <b>${fc.toFixed(0)} mm</b> against a normal ${nm.toFixed(0)} mm (1981-2025 average), so the week is <b>${wd}</b>.</p><p style="margin:0 0 8px">${MN} averages ${CLIM[cm][0]} mm. The wettest ${MN} on record had ${CLIM[cm][1]} mm (${CLIM[cm][2]}).</p><p class="note" style="margin:0">Monthly design depths from your rainfall analysis: 2-year 312 mm, 10-year 416 mm, 100-year 545 mm (Gumbel). The wettest month in the whole record was 471 mm (October 2019).</p>`;
+  const show=days.map((d,i)=>[d,i]).slice(Math.max(0,TI-2));
+  $('fcb').innerHTML=show.map(([d,i])=>{
+    const lab=new Date(d.date+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',day:'numeric',month:'short'})+(i===TI?' (today)':i<TI?' (past)':'');
+    return`<tr data-i="${i}" class="${i===sel?'sel':''}"><td>${lab}</td><td>${d.c.rain.toFixed(1)} mm${d.rainR[0].toFixed(0)===d.rainR[1].toFixed(0)?'':` <span class="rg">(${d.rainR[0].toFixed(0)}-${d.rainR[1].toFixed(0)})</span>`}</td><td>${d.c.runoff.toFixed(1)} mm</td><td>${Math.round(d.c.peakQ).toLocaleString()} m³/s</td><td>${d.c.maxWl.toFixed(2)} m${d.wlR[0].toFixed(2)===d.wlR[1].toFixed(2)?'':` <span class="rg">(${d.wlR[0].toFixed(2)}-${d.wlR[1].toFixed(2)})</span>`}</td><td>${d.c.street.toFixed(0)} mm</td><td>${(d.prob*100).toFixed(0)}%</td><td><span class="dot" style="background:${COL[d.risk]}"></span>${d.risk}</td></tr>`}).join('');
+  document.querySelectorAll('#fcb tr').forEach(tr=>tr.onclick=()=>{sel=+tr.dataset.i;renderLive()});
+  if(c3)c3.destroy();
+  const ln=(l,f,o)=>({type:'line',label:l,data:show.map(([d])=>f(d)),yAxisID:'y1',borderWidth:2.5,pointRadius:0,...o});
+  c3=new Chart($('c3'),{type:'bar',data:{labels:show.map(([d])=>d.date.slice(5)),datasets:[
+    {type:'bar',label:'Rain (mm)',data:show.map(([d])=>+d.c.rain.toFixed(1)),backgroundColor:'rgba(26,127,142,.55)',yAxisID:'y'},
+    ln('p10',d=>d.wlR[0],{borderColor:'transparent',label:'Low estimate (10%)'}),
+    ln('p90',d=>d.wlR[1],{borderColor:'transparent',backgroundColor:'rgba(11,42,53,.15)',fill:'-1',label:'Likely range of lagoon level'}),
+    ln('c',d=>d.c.maxWl,{borderColor:'#0b2a35',label:'Max lagoon level (m)'}),
+    ln('k',()=>L.crit,{borderColor:'#e0a030',borderDash:[6,4],borderWidth:1.5,label:'Critical 0.5 m'})]},
+    options:{responsive:true,maintainAspectRatio:false,animation:false,scales:{y:{beginAtZero:true,title:{display:true,text:'Rain (mm)'}},y1:{position:'right',min:0,suggestedMax:1,grid:{drawOnChartArea:false},title:{display:true,text:'Level (m)'}}},plugins:{legend:{position:'bottom',labels:{filter:i=>i.text!=='Low estimate (10%)'}}}}});
+  const d=days[sel],R=interpretDay(d);
+  gauge(d.c.maxWl,d.risk,'g2');
+  $('v2').innerHTML=`<span class="badge" style="background:${COL[d.risk]}">${d.risk} risk</span><h2 style="margin-top:8px">${dn(d)}</h2><p style="margin:0;color:var(--mute)">${d.c.rain.toFixed(1)} mm of rain over about ${d.c.wet} wet hours. Ground moisture class ${d.cls}, adjusted curve number ${d.cn.toFixed(1)}.</p>`;
+  $('i2').innerHTML=R.out.map(([h,p])=>`<div><h3>${h}</h3><p>${p}</p></div>`).join('');
+  $('a2').innerHTML=R.acts.map(a=>`<li>${a}</li>`).join('');
+}
+function showTab(v){
+  const k=v===true?'L':v===false?'E':v;
+  $('live').hidden=k!=='L';$('explorer').hidden=k!=='E';$('climate').hidden=k!=='C';
+  ['L','E','C'].forEach(x=>$('tab'+x).classList.toggle('on',x===k));
+  if(k==='C'&&!kc.length)drawClimate();
+  setTimeout(()=>{(k==='L'?[c3]:k==='E'?[c1,c2]:kc).forEach(c=>c&&c.resize())},0);
+}
+function drawClimate(){
+  const M=KD.mo,ML=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],G='#eceee8';
+  const mk=(id,cfg)=>{kc.push(new Chart($(id),{...cfg,options:{responsive:true,maintainAspectRatio:false,animation:false,plugins:{legend:{position:'bottom'}},...cfg.options}}))};
+  const n=KD.yrs.length;
+  mk('k1',{type:'bar',data:{labels:KD.yrs,datasets:[{label:'Annual rainfall (mm)',data:KD.ann,backgroundColor:'rgba(26,127,142,.55)'},{type:'line',label:`Sen's slope (+${KD.sen} mm/yr)`,data:KD.yrs.map(y=>KD.ic+KD.sen*y),borderColor:'#d95d39',borderWidth:2.5,pointRadius:0}]},options:{scales:{y:{title:{display:true,text:'mm per year'}}}}});
+  mk('k2',{type:'bar',data:{labels:ML,datasets:[{label:'Mean rainfall (mm)',data:M.mean,backgroundColor:'rgba(26,127,142,.55)',yAxisID:'y'},{type:'line',label:'Driest 10% of years',data:M.p10,borderColor:'transparent',pointRadius:0,yAxisID:'y'},{type:'line',label:'Normal range (10th to 90th percentile)',data:M.p90,borderColor:'transparent',backgroundColor:'rgba(11,42,53,.15)',fill:'-1',pointRadius:0,yAxisID:'y'},{type:'line',label:'Wettest on record',data:M.max,borderColor:'#d95d39',borderDash:[5,4],borderWidth:1.5,pointRadius:2,yAxisID:'y'},{type:'line',label:'Streamflow column (mean)',data:M.flow,borderColor:'#0b2a35',borderWidth:2.5,pointRadius:0,yAxisID:'y1'}]},options:{scales:{y:{beginAtZero:true,title:{display:true,text:'Rain (mm/month)'}},y1:{position:'right',beginAtZero:true,grid:{drawOnChartArea:false},title:{display:true,text:'Streamflow'}}},plugins:{legend:{position:'bottom',labels:{filter:i=>i.text!=='Driest 10% of years'}}}}});
+  mk('k3',{type:'bar',data:{labels:ML,datasets:[{label:'Years with 300 mm or more (%)',data:M.wet,backgroundColor:M.wet.map(v=>v>=30?'#d95d39':v>=10?'#e0a030':'#9fcdd3')}]},options:{scales:{y:{beginAtZero:true,max:100,title:{display:true,text:'% of years'}}}}});
+  const R=KD.rp;
+  mk('k4',{type:'line',data:{labels:['2','5','10','25','50','100','200'],datasets:[{label:'Gumbel',data:R.Gumbel,borderColor:'#1a7f8e',borderWidth:2.5},{label:'Gumbel 95% interval',data:R.Gum_hi,borderColor:'transparent',backgroundColor:'rgba(26,127,142,.15)',fill:'+1',pointRadius:0},{label:'lower',data:R.Gum_lo,borderColor:'transparent',pointRadius:0},{label:'GEV',data:R.GEV,borderColor:'#e0a030',borderWidth:2},{label:'Log-Pearson III',data:R.LP3,borderColor:'#7a5c9e',borderWidth:2},{label:`Wettest month on record (${KD.rec} mm)`,data:R.Gumbel.map(()=>KD.rec),borderColor:'#d95d39',borderDash:[6,4],borderWidth:1.5,pointRadius:0}]},options:{scales:{x:{title:{display:true,text:'Return period (years)'}},y:{title:{display:true,text:'mm per month'}}},plugins:{legend:{position:'bottom',labels:{filter:i=>i.text!=='lower'}}}}});
+  const ts=[1.5,2,3,5,7,10,15,20,30,50,75,100,150,200,300,500],gq=t=>GU.U-GU.A*Math.log(-Math.log(1-1/t)),eq=t=>GV.l+GV.s*(1-Math.pow(-Math.log(1-1/t),GV.c))/GV.c;
+  const hl=(l,v,c)=>({type:'line',label:l,data:[{x:1,y:v},{x:500,y:v}],borderColor:c,borderDash:[6,4],borderWidth:1.5,pointRadius:0});
+  mk('k5',{type:'scatter',data:{datasets:[{label:'Yearly maximum day',data:KR.map((v,i)=>({x:(KR.length+1)/(i+1),y:v})),backgroundColor:'#0b2a35',pointRadius:5},{type:'line',label:'Gumbel',data:ts.map(t=>({x:t,y:gq(t)})),borderColor:'#1a7f8e',borderWidth:2.5,pointRadius:0},{type:'line',label:'GEV',data:ts.map(t=>({x:t,y:eq(t)})),borderColor:'#e0a030',borderWidth:2.5,pointRadius:0},{label:'Aim 3 5-year storm (120 mm)',data:[{x:5,y:120}],backgroundColor:'#d95d39',pointStyle:'triangle',pointRadius:9}]},options:{scales:{x:{type:'logarithmic',min:1,max:500,title:{display:true,text:'Return period (years)'}},y:{beginAtZero:true,max:200,title:{display:true,text:'Daily rainfall (mm)'}}}}});
+  mk('k6',{type:'bar',data:{labels:KS.yrs,datasets:[{label:'Annual mean sea-level anomaly (m)',data:KS.ann,backgroundColor:'rgba(26,127,142,.55)'},{type:'line',label:`Sen's slope (+${KS.slope} mm/yr)`,data:KS.yrs.map(y=>KS.ic+KS.slope/1000*y),borderColor:'#d95d39',borderWidth:2.5,pointRadius:0}]},options:{scales:{y:{title:{display:true,text:'metres'}}}}});
+  mk('k7',{type:'bar',data:{labels:ML,datasets:[{label:'Mean sea-level anomaly by month (m)',data:KS.mon,backgroundColor:KS.mon.map(v=>v>0.1?'#d95d39':v>0.05?'#e0a030':'#9fcdd3')}]},options:{scales:{y:{title:{display:true,text:'metres'}}}}});
+  const top=M.wet.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0]).slice(0,3).filter(x=>x[0]>0).map(x=>ML[x[1]]);
+  const wm=M.mean.map((v,i)=>[v,i]).sort((a,b)=>b[0]-a[0])[0];
+  const ch=KD.sen*(n-1);
+  const T=(h,p)=>`<div><h3>${h}</h3><p>${p}</p></div>`;
+  const hold=document.createElement('div');hold.innerHTML=T('Trend',`Annual rainfall averages ${Math.round(KD.ann.reduce((a,b)=>a+b)/n)} mm and has risen by about ${KD.sen} mm a year (Sen's slope, Mann-Kendall p = 0.028), roughly ${Math.round(ch)} mm over the record. The year-to-year scatter is large, so the trend is real but weak (raw R² is only 0.14).`)+
+   T('Flood season',`${ML[wm[1]]} is the wettest month on average (${wm[0]} mm). Months reaching 300 mm or more most often are ${top.join(', ')}. These are the months when the lagoon is most likely to be threatened.`)+
+   T('Extremes',`The wettest month on record was ${KD.rec} mm, and the Gumbel fit gives ${R.Gumbel[2]} mm for a 10-year month and ${R.Gumbel[5]} mm for a 100-year month (95% range ${R.Gum_lo[5]} to ${R.Gum_hi[5]} mm). The fitted distributions disagree more at long return periods, so treat the 100- and 200-year values as uncertain.`)+
+   T('Evaporation check',`Monthly evaporation in your record averages about ${(ETM.reduce((a,b)=>a+b)/ETM.length/30.4).toFixed(1)} mm a day, close to the 4.5 mm a day used in the model. The Daily forecast now uses the current month's value.`)+
+   T('Daily extremes',`The wettest day in 45 years was ${KR[0]} mm on 4 July 2020, and the yearly maximum day averages ${(KR.reduce((a,b)=>a+b)/KR.length).toFixed(0)} mm. The Gumbel fit gives ${gq(10).toFixed(0)} mm for a 10-year day and ${gq(100).toFixed(0)} mm for a 100-year day; the GEV fit gives ${eq(100).toFixed(0)} mm for the 100-year day. With only 45 yearly maxima and one very large value, the two fits disagree a lot at long return periods.`)+
+   T('Aim 3 storm depths',`The storms in Aim 3 (120 mm as a 5-year event, 340 mm as a 100-year event, 425 mm as a 2020-like event) are about ${(120/gq(5)).toFixed(1)}, ${(340/gq(100)).toFixed(1)} and ${(425/KR[0]).toFixed(1)} times the daily-record values (Gumbel 5-year and 100-year depths, and the observed 2020 day). Gridded daily data smooths point extremes and a storm can fall in a few hours, so the true gap may be smaller, but these depths need a source before they are used as return-period storms.`)+
+   T('Sea level',`Satellite sea level has risen about ${KS.slope} mm a year since 1993 (Sen's slope), around ${(KS.slope*32/10).toFixed(0)} cm over the record. It is highest in October and November (about +${KS.mon[9].toFixed(2)} m) and lowest in July and August, so the lagoon drains least easily during the second rainy peak. The largest daily anomaly was ${KS.maxraw} m (November 2020) and sea level did not rise on heavy-rain days, so the 2.0 m rain-linked surge in Aim 3 is not supported by this daily record.`);
+  const sec={Trend:'r1','Flood season':'r1','Evaporation check':'r1',Extremes:'r2','Daily extremes':'r2','Aim 3 storm depths':'r2','Sea level':'r3'};
+  [...hold.children].forEach(el=>$(sec[el.querySelector('h3').textContent]).appendChild(el));
+  const K=(a,b,c)=>`<div class="stat"><small>${a}</small><strong>${b}</strong><small>${c}</small></div>`;
+  $('kstats').innerHTML=K('Rainfall trend','+'+KD.sen+' mm/yr','Sen slope, p = 0.028')+K('Wettest day',KR[0]+' mm','4 July 2020')+K('Wettest month',KD.rec+' mm','October 2019')+K('Sea-level rise','+'+KS.slope+' mm/yr','satellite, 1993-2025');
+  document.querySelectorAll('#climate details').forEach(d=>d.addEventListener('toggle',()=>kc.forEach(c=>c.resize())));
+}
+function initLive(){
+  $('tabL').onclick=()=>showTab('L');$('tabE').onclick=()=>showTab('E');$('tabC').onclick=()=>showTab('C');
+  $('expl').onclick=()=>{const d=days[sel];if(!d)return;
+    $('rain').value=Math.round(d.c.rain/5)*5;$('dur').value=Math.max(1,Math.min(24,d.c.wet));$('cn').value=Math.round(d.cn*2)/2;run();showTab(false)};
+  loadForecast();setInterval(loadForecast,3*3600*1000);
+}
+
+for(const k of Object.keys(ids))$(k).addEventListener('input',run);
+for(const[n,[p,d]]of Object.entries(PRESETS)){
+  const b=document.createElement('button');b.textContent=n;
+  b.onclick=()=>{$('rain').value=p;$('dur').value=d;run()};$('presets').appendChild(b)}
+for(const[n,[p,d]]of Object.entries(DPRESETS)){const b=document.createElement('button');b.textContent=n;b.onclick=()=>{$('rain').value=p;$('dur').value=d;run()};$('presets2').appendChild(b)}
+run();initLive();
+</script>
+</body>
+</html>
