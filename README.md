@@ -46,6 +46,6 @@ A browser-based tool that estimates how the Lagos lagoon system responds to rain
 
 ## Author
 
-NAME: SHOOLA SIKIRU AFOLABI 
-YOUR INSTITUTION: AHMADU BELLO UNIVERSITY 
+NAME: SHOOLA SIKIRU AFOLABI, 
+YOUR INSTITUTION: AHMADU BELLO UNIVERSITY, 
 YEAR: 2026
