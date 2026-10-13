@@ -10,13 +10,13 @@ A browser-based tool that estimates how the Lagos lagoon system responds to rain
 
 **Daily forecast.** Downloads the latest rainfall forecast (Open-Meteo) for Lagos Island and four points across the lagoon basin, and models the next week automatically. For each day it reports runoff, peak inflow, lagoon water level, a street-flooding index, the chance that the lagoon passes its critical level, a risk class, and a plain-language reading with suggested actions. Ranges come from 80 simulations that vary the forecast rain, curve number, surge and outlet capacity.
 
-**Scenario explorer.** Choose a storm (rainfall depth and duration) and see the inflow hydrograph, lagoon water level, flood duration and a written interpretation. Presets include storms from the 1981-2025 daily rainfall record and the original Objective Three storms.
+**Scenario explorer.** Choose a storm (rainfall depth and duration) and see the inflow hydrograph, lagoon water level, flood duration, a written interpretation and an indicative elevation and flood-extent map. Presets include 2 to 200-year storms from the 1981-2025 daily rainfall record and the Objective Three design storms.
 
 **Climate record.** Rainfall trend, seasonal cycle, how often months are very wet, monthly and daily return periods, and satellite sea-level trend and seasonality.
 
 ## How it works
 
-- SCS Curve Number runoff (CN 76.54, adjusted for antecedent moisture from the previous 5 days of rain).
+- SCS Curve Number runoff (default CN 90.2, the Objective Two composite value, adjustable in the Scenario explorer and adjusted for antecedent moisture from the previous 5 days of rain).
 - A gamma-type unit hydrograph for the 4,500 km2 basin (18 h time lag).
 - A 15-minute lagoon water balance with tide, surge, outlet flow, evaporation and direct rain.
 - A street-drainage index for the paved island (assumed runoff coefficient 0.75, drainage capacity 15 mm/h).
@@ -30,6 +30,7 @@ A browser-based tool that estimates how the Lagos lagoon system responds to rain
 | Satellite sea level 1993-2025 | Lagos_Sea_Level_Daily.csv | Sea-level trend and seasonality |
 | Objective One frequency analysis | AIM1_return_periods.csv | Monthly design depths |
 | Lagos Island boundary | lagos_island.shp | Study-area map |
+| Elevation (30 m, whole metres) | clipped_dem.tif | Elevation and flood-extent map |
 | Live rainfall and sea level | Open-Meteo | Daily forecast |
 
 ## Limitations
@@ -40,12 +41,11 @@ A browser-based tool that estimates how the Lagos lagoon system responds to rain
 - The streamflow column in MET_DATA.csv was derived from water level; its units and rating curve are unconfirmed and it is used only as a rough indicator.
 - Sea-level data are daily means, so tides and short local surges are not represented. They do not support the 2.0 m rain-linked surge used in Objective Three.
 - The street-flooding index and the forecast uncertainty ranges are model assumptions, not calibrated values.
-- Water levels are not validated against measured lagoon records, and there is no elevation data, so the app does not map flood depth or extent.
+- Water levels are not validated against measured lagoon records. The elevation model has a 30 m cell size and whole-metre heights, so the flood-extent map is indicative only: land near sea level cannot be separated from water, and flooded area is a minimum.
 
-## Updating the app
-
-Edit or replace `index.html` in this repository and commit. GitHub Pages republishes within a minute or two. Press Ctrl+F5 to see the newest version.
 
 ## Author
 
-YOUR NAME, YOUR INSTITUTION, YEAR
+NAME: SHOOLA SIKIRU AFOLABI 
+YOUR INSTITUTION: AHMADU BELLO UNIVERSITY 
+YEAR: 2026
